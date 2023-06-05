@@ -5,27 +5,15 @@ import {FormValidError, emailValidation, passwordValidation, passwordConfirmVali
 //import { signupWithEmailAndPassword, AuthItem } from '@/lib/NEXT_PUBLIC_FIREBASE_auth';
 import { User, createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
 import Link from 'next/link';
-//import {initializeFirebaseApp} from '../../lib/firebase/firebase'
-import { FirebaseContext } from '@/context/firebase.context';
-import { getApps,  initializeApp, getApp} from "firebase/app"
+import {initializeFirebaseApp} from '../../lib/firebase/firebase'
+import { useFirebaseContext, SET_USER, SET_FIREBASE_APP, SET_FIREBASE_AUTH } from '@/context/firebase.context';
 
 
 export default function Signup() {
-  // Your web app's Firebase configuration
-  const firebaseConfig:Object = {
-    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUYH_DOMAIN,
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGEING_SENDER_ID,
-    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
-  };
-  console.log(process.env)
-  console.log(firebaseConfig)
+  const { state, dispatch } = useFirebaseContext()
 
-  const initializeFirebaseApp = () => {
-    return !getApps().length ? initializeApp(firebaseConfig) : getApp()
-  }
+    console.log(state)
+    //console.log(dispatch.)
 
 
   const defaulyFormError:FormValidError = {
@@ -63,8 +51,10 @@ export default function Signup() {
   const submit = async (e : React.ChangeEvent<HTMLInputElement>) => {
       e.preventDefault()
 
-      const firebase = initializeFirebaseApp();
-      const auth = getAuth(firebase);
+      const firebase = state.firebase || initializeFirebaseApp();
+      dispatch({type: SET_FIREBASE_APP, value: firebase})
+      const auth = state.firebaseAuth || getAuth(firebase);
+      dispatch({type: SET_FIREBASE_AUTH, value: auth})
 
       await createUserWithEmailAndPassword(auth, email, password).then((res) => {
         console.log("createUserWithEmailAndPassword")
@@ -72,6 +62,7 @@ export default function Signup() {
         if(res.user){
           setUser(res.user);
           alert("登録完了")
+          dispatch({type: SET_USER, value: res.user})
         } else {
           console.log("エラーーーーーーー")
         }

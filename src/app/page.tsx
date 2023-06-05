@@ -1,11 +1,19 @@
 'use client'
-import { createContext, useContext, useState } from 'react';
 import Image from 'next/image'
 import styles from './page.module.css'
-import { User } from 'firebase/auth';
 import Link from 'next/link';
+import { useFirebaseContext } from '@/context/firebase.context';
+import { SET_USER } from '@/context/firebase.context';
 
 export default function Home() {
+
+  const { state, dispatch } = useFirebaseContext()
+  console.log(state)
+
+  const signOut = () => {
+    dispatch({type: SET_USER, value: null})
+    alert("ログアウトしました。")
+  }
 
   return (
     <main className={styles.main}>
@@ -14,7 +22,15 @@ export default function Home() {
           
         </p>
         <div>
-          <Link href="/signup">Signup</Link>
+          {!state.user && (
+            <>
+            <Link href="/signup">Signup</Link>
+            <Link href="/signin">Signin</Link>
+            </>
+          )}
+          {state.user && (
+            <button type="submit" className="btn btn-primary" onClick={signOut}>サインアウト</button>
+          )}
         </div>
       </div>
 
