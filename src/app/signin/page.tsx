@@ -1,94 +1,93 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+'use client';
+import { FormEvent, useState } from 'react';
+import { useRouter } from 'next/router';
+import {FormValidError, emailValidation, passwordValidation, passwordConfirmValidation} from '../../utils/form_validation'
+import styles from '../page.module.css'
+import {initializeFirebaseApp} from '../../lib/firebase/firebase'
+import { useFirebaseContext, SET_USER, SET_FIREBASE_APP, SET_FIREBASE_AUTH } from '@/context/firebase.context';
+import { User, signInWithEmailAndPassword, getAuth } from 'firebase/auth';
+import Utils from '@/utils/utils';
+import Link from 'next/link';
 
 export default function Signin() {
+  const { state, dispatch } = useFirebaseContext()
+  
+  const defaulyFormError:FormValidError = {
+    isValid: true,
+    message: ''
+  } 
+  const [email, setEmail] = useState('');
+  const [validEmail, setvalidEmail] = useState(defaulyFormError);
+
+  const [password, setPassword] = useState('');
+  const [validPassword, setValidPassword] = useState(defaulyFormError);
+
+  const [user, setUser] = useState<User>();
+ 
+
+  const handleChangeEmail = (e : React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value)
+    setvalidEmail(emailValidation(e.target.value));
+  }
+  const handleChangePassword = (e : React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value)
+    setValidPassword(passwordValidation(e.target.value));
+  }
+
+  /**
+   * 新規登録
+   */
+  const submit = async (e : FormEvent<HTMLFormElement>) => {
+      e.preventDefault()
+
+      const firebase = state.firebase || initializeFirebaseApp();
+      dispatch({type: SET_FIREBASE_APP, value: firebase})
+      const auth = state.firebaseAuth || getAuth(firebase);
+      dispatch({type: SET_FIREBASE_AUTH, value: auth})
+
+      await signInWithEmailAndPassword(auth, email, password).then((res) => {
+        if(res.user){
+          setUser(res.user);
+          Utils.popup("ログイン完了")
+          dispatch({type: SET_USER, value: res.user})
+          const router = useRouter();
+          router.push("/");
+        } else {
+          Utils.errorMessage('ログイン処理中にエラーが発生しました。')
+        }
+      }).catch((error) => {
+        Utils.errorMessage(error)
+      })
+  }
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <main className={`${styles.main} row`}>
+      <div className="col">
+      <form onSubmit={submit}>
+        <div className="mb-3">
+          <label htmlFor="email" className="form-label">メールアドレス</label>
+          <input type="email" className="form-control" id="email" aria-describedby="emailHelp" defaultValue={email} onChange={handleChangeEmail}/>
+          {!validEmail.isValid && (
+            <div id="emailFeedback" className="invalid-feedback">{validEmail.message}</div>
+          )}
         </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
+        <div className="mb-3">
+          <label htmlFor="password" className="form-label">パスワード</label>
+          <input type="password" className="form-control" id="password" defaultValue={password} onChange={handleChangePassword} />
+          {!validPassword.isValid && (
+            <div id="passwordFeedback" className="invalid-feedback">{validPassword.message}</div>
+          )}
+        </div>
+        <button type="submit" className="btn btn-primary" >ログイン</button>
+      </form>
+      <div className="mt-5 row">
+            <div className="col-2 p-1">
+              <Link href="/">トップに戻る</Link>
+            </div>
+            <div className="col-2 p-1">
+              <Link href="/signup">新規登録はこちら</Link>
+            </div>
+        </div>
       </div>
     </main>
   )

@@ -3,11 +3,13 @@
 import React, { Dispatch, createContext, useReducer, useContext, useEffect } from "react";
 import { initializeFirebaseApp } from '../lib/firebase/firebase'
 import { getAuth, User, onAuthStateChanged } from "firebase/auth";
+import Loading from "@/component/loading";
 
 type StateType = {
   firebase: any;
   firebaseAuth: any;
   user: User | null;
+  loading: boolean;
 };
 
 type ActionType = {
@@ -18,7 +20,8 @@ type ActionType = {
 const initialState: StateType = {
   firebase: null,
   firebaseAuth: null,
-  user: null
+  user: null,
+  loading : false,
 };
 
 export const INIT_FIREBASE_APP =  'INIT_FIREBASE_APP';
@@ -26,6 +29,7 @@ export const INIT_FIREBASE_AUTH = 'INIT_FIREBASE_AUTH';
 export const SET_FIREBASE_APP = 'SET_FIREBASE_APP'
 export const SET_USER =  'SET_USER';
 export const SET_FIREBASE_AUTH = 'SET_FIREBASE_AUTH';
+export const SET_LOADING = 'SET_LOADING';
 
 const reducer = (state: StateType, action: ActionType) => {
   switch (action.type) {
@@ -39,6 +43,8 @@ const reducer = (state: StateType, action: ActionType) => {
         return { ...state, firebaseAuth: action.value } 
     case SET_USER:
         return { ...state, user: action.value } 
+    case SET_LOADING:
+        return { ...state, loading: action.value } 
     default:
         return state;
   }
@@ -75,9 +81,12 @@ export const FirebaseContextProvider = ({
   }, [])
 
   return (
+    <>
     <FirebaseContext.Provider value={{ state, dispatch }}>
       {children}
     </FirebaseContext.Provider>
+    {state.loading && <Loading></Loading>}
+    </>
   );
 };
 

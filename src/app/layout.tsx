@@ -1,3 +1,4 @@
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './globals.css'
 import { Inter } from 'next/font/google'
 import { FirebaseContextProvider } from '@/context/firebase.context'
@@ -15,7 +16,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="ja">
       <body className={inter.className}>
         <FirebaseContextProvider>{children}</FirebaseContextProvider>
       </body>

@@ -17,7 +17,7 @@ export const emailValidation = (email:string) => {
     }
     if(!mail_regex.test(email)){
         valid.isValid = false
-        valid.message = 'メールアドレスを正しく入力してください。'
+        valid.message = 'メールアドレスを正しい形式で入力してください。'
         return valid
     }
     return valid
@@ -37,7 +37,7 @@ export const passwordValidation = (password:string) => {
     }
     if(!password_regex.test(password)){
         valid.isValid = false
-        valid.message = 'パスワードを正しく入力してください。'
+        valid.message = 'パスワードは8~16文字の半角数字、半角英字で入力してください。'
         return valid
     }
     return valid
@@ -53,11 +53,25 @@ export const passwordConfirmValidation = (password:string, passwordConfirm:strin
         isValid: true,
         message: ''
     }
-    if(password !== password){
+    if(password !== passwordConfirm){
         valid.isValid = false
         valid.message = 'パスワードが一致しません。'
         return valid
     }
     return valid
 }
+
+export const nameValidation = (name:string) => {
+    let valid:FormValidError = {
+        isValid: true,
+        message: ''
+    }
+    if(!name || name.length > 16 ){
+        valid.isValid = false
+        valid.message = '名前は16字以内で入力してください。'
+        return valid
+    }
+    return valid
+}
+
 
