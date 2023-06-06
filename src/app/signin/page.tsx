@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import {FormValidError, emailValidation, passwordValidation, passwordConfirmValidation} from '../../utils/form_validation'
 import styles from '../page.module.css'
 import {initializeFirebaseApp} from '../../lib/firebase/firebase'
-import { useFirebaseContext, SET_USER, SET_FIREBASE_APP, SET_FIREBASE_AUTH } from '@/context/firebase.context';
+import { useFirebaseContext, SET_USER, SET_FIREBASE_APP, SET_FIREBASE_AUTH, SET_LOADING } from '@/context/firebase.context';
 import { User, signInWithEmailAndPassword, getAuth } from 'firebase/auth';
 import Utils from '@/utils/utils';
 import Link from 'next/link';
@@ -44,8 +44,10 @@ export default function Signin() {
       dispatch({type: SET_FIREBASE_APP, value: firebase})
       const auth = state.firebaseAuth || getAuth(firebase);
       dispatch({type: SET_FIREBASE_AUTH, value: auth})
+      dispatch({type: SET_LOADING, value: true})
 
       await signInWithEmailAndPassword(auth, email, password).then((res) => {
+        dispatch({type: SET_LOADING, value: false})
         if(res.user){
           setUser(res.user);
           Utils.popup("ログイン完了")
@@ -56,7 +58,9 @@ export default function Signin() {
           Utils.errorMessage('ログイン処理中にエラーが発生しました。')
         }
       }).catch((error) => {
+        dispatch({type: SET_LOADING, value: false})
         Utils.errorMessage(error)
+        
       })
   }
 

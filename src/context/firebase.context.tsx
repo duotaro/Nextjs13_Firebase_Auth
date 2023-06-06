@@ -64,10 +64,6 @@ export const FirebaseContextProvider = ({
 
   useEffect(() => {
     try {
-      console.log("▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲")
-      console.log(state)
-      console.log(state.firebase)
-      console.log("▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲")
       if(state.firebase){
         const auth = getAuth(state.firebase)
         return onAuthStateChanged(auth, (user) => {

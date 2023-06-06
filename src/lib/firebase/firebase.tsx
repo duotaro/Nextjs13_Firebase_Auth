@@ -10,8 +10,6 @@ export const firebaseConfig:Object = {
     messagingSenderId: ENV.FIREBASE_MESSAGEING_SENDER_ID,
     appId: ENV.FIREBASE_APP_ID
 };
-console.log(process.env)
-console.log(firebaseConfig)
 
 export const initializeFirebaseApp = () => {
     return !getApps().length ? initializeApp(firebaseConfig) : getApp()

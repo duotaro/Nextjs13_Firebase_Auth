@@ -1,3 +1,4 @@
+import Utils from "./utils"
 /*******************
  * 環境変数
  */
@@ -21,16 +22,9 @@ const ENV = {
     FIREBASE_APP_ID: FIREBASE_APP_ID
 }
 
-
-const consoleLogAlert = (log:string) => {
-    console.log("■■■■■■■■■")
-    console.log(log)
-    console.log("■■■■■■■■■")
-}
-
 // check
 if(!ENV.FIREBASE_API_KEY){
-    consoleLogAlert("FIREBASE_API_KEY is empty.");
+    Utils.popup("FIREBASE_API_KEY is empty. Check to make sure that environment variables are set correctly in the .env.local file and in other predetermined places.");
 }
 
 export default ENV

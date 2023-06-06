@@ -5,7 +5,7 @@ import {FormValidError, emailValidation, passwordValidation, passwordConfirmVali
 import { User, createUserWithEmailAndPassword, getAuth, updateProfile } from 'firebase/auth';
 import Link from 'next/link';
 import {initializeFirebaseApp} from '../../lib/firebase/firebase'
-import { useFirebaseContext, SET_USER, SET_FIREBASE_APP, SET_FIREBASE_AUTH } from '@/context/firebase.context';
+import { useFirebaseContext, SET_USER, SET_FIREBASE_APP, SET_FIREBASE_AUTH, SET_LOADING } from '@/context/firebase.context';
 import Utils from '@/utils/utils';
 
 export default function Signup() {
@@ -56,6 +56,7 @@ export default function Signup() {
       dispatch({type: SET_FIREBASE_APP, value: firebase})
       const auth = state.firebaseAuth || getAuth(firebase);
       dispatch({type: SET_FIREBASE_AUTH, value: auth})
+      dispatch({type: SET_LOADING, value: true})
 
       await createUserWithEmailAndPassword(auth, email, password).then((res) => {
         if(res.user){
@@ -68,19 +69,23 @@ export default function Signup() {
             }
 
             updateProfile(auth.currentUser, profileParam).then((res2) => {
+              dispatch({type: SET_LOADING, value: false})
               Utils.popup("登録完了")
-              console.log(res2)
             }).catch((error) => {
+              dispatch({type: SET_LOADING, value: false})
               Utils.errorMessage('新規登録は完了しましたが、名前の登録に失敗しました。')
             });
           } else {
+            dispatch({type: SET_LOADING, value: false})
             Utils.popup("登録完了")
             dispatch({type: SET_USER, value: res.user})
           }
         } else {
+          dispatch({type: SET_LOADING, value: false})
           Utils.errorMessage('新規登録中にエラーが発生しました。')
         }
       }).catch((error) => {
+        dispatch({type: SET_LOADING, value: false})
         Utils.errorMessage(`${error}`)
       })
   }
