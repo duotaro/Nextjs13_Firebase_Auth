@@ -1,6 +1,9 @@
 # Nextjs13_NEXT_PUBLIC_FIREBASE_Auth
 NEXT.js13でFirebase Authを実装しました。
 
+## Demo
+https://nextjs13-firebase-auth.vercel.app/
+
 ## get start
 Create a Firebase account and create a project.
 Firebaseのアカウントを作成し、プロジェクトを作成します。
@@ -28,3 +31,4 @@ NEXT_PUBLIC_FIREBASE_APP_ID=xxxxxx
 ・`/src/utils/form_validation.tsx` checks the contents entered in the form. Please change the regular expressions, etc. according to your specifications.
 
 ・Common processing for popups and error handling was created in `/src/utils/utils.tsx`. Each of them uses alert and console.log, but you can change them to your own implementation.
+
