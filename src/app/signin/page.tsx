@@ -1,13 +1,14 @@
 'use client';
 import { FormEvent, useState } from 'react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import {FormValidError, emailValidation, passwordValidation, passwordConfirmValidation} from '../../utils/form_validation'
 import styles from '../page.module.css'
 import {initializeFirebaseApp} from '../../lib/firebase/firebase'
 import { useFirebaseContext, SET_USER, SET_FIREBASE_APP, SET_FIREBASE_AUTH, SET_LOADING } from '@/context/firebase.context';
-import { User, signInWithEmailAndPassword, getAuth } from 'firebase/auth';
+import { User, signInWithEmailAndPassword, getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import Utils from '@/utils/utils';
 import Link from 'next/link';
+import { Google } from '@/component/shared/icons';
 
 export default function Signin() {
   const { state, dispatch } = useFirebaseContext()
@@ -21,8 +22,9 @@ export default function Signin() {
 
   const [password, setPassword] = useState('');
   const [validPassword, setValidPassword] = useState(defaulyFormError);
-
+  const [signInClicked, setSignInClicked] = useState(false);
   const [user, setUser] = useState<User>();
+  const router = useRouter();
  
 
   const handleChangeEmail = (e : React.ChangeEvent<HTMLInputElement>) => {
@@ -35,7 +37,45 @@ export default function Signin() {
   }
 
   /**
-   * 新規登録
+   * googleでログイン
+   */
+  const googleSignIn = (e : FormEvent<HTMLButtonElement>) => {
+    e.preventDefault()
+
+    const firebase = state.firebase || initializeFirebaseApp();
+    dispatch({type: SET_FIREBASE_APP, value: firebase})
+    const auth = state.firebaseAuth || getAuth(firebase);
+    dispatch({type: SET_FIREBASE_AUTH, value: auth})
+    dispatch({type: SET_LOADING, value: true})
+
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider).then((result) => {
+      dispatch({type: SET_LOADING, value: false})
+        // This gives you a Google Access Token. You can use it to access the Google API.
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        const token = credential?.accessToken;
+        // The signed-in user info.
+      
+        const user = result.user;
+        if(user){
+          setUser(user);
+          Utils.popup("ログイン完了")
+          dispatch({type: SET_USER, value: user})
+          
+          router.push("/");
+        } else {
+          Utils.errorMessage('ログイン処理中にエラーが発生しました。')
+        }
+    }).catch((error) => {
+      dispatch({type: SET_LOADING, value: false})
+      console.log(error)
+      Utils.errorMessage(error.message)
+      // ...
+    });
+  }
+
+  /**
+   * ログイン
    */
   const submit = async (e : FormEvent<HTMLFormElement>) => {
       e.preventDefault()
@@ -52,7 +92,6 @@ export default function Signin() {
           setUser(res.user);
           Utils.popup("ログイン完了")
           dispatch({type: SET_USER, value: res.user})
-          const router = useRouter();
           router.push("/");
         } else {
           Utils.errorMessage('ログイン処理中にエラーが発生しました。')
@@ -84,6 +123,15 @@ export default function Signin() {
         </div>
         <button type="submit" className="btn btn-primary" >ログイン</button>
       </form>
+      <div className="row mt-3">
+          <div className="col-md-12">
+            <button className="btn btn-secondary btn-block text-uppercase btn-outline" onClick={(e) => {
+              googleSignIn(e)
+            }}>
+              <img src="https://img.icons8.com/color/16/000000/google-logo.png" className=''/>   Signup Using Google
+            </button>
+          </div>
+      </div>
       <div className="mt-5 row">
             <div className="col-2 p-1">
               <Link href="/">トップに戻る</Link>
